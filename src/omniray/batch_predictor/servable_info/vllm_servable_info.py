@@ -15,15 +15,13 @@ class VLLMServableInfo(ServableInfo):
         full_path: str,
         model_name: str,
         device_type: DeviceType = DeviceType.CUDA,
-        config: Union[VLLMConfigs, None] = None,
-        **kwargs
+        config: Union[VLLMConfigs, None] = None
     ):
         super().__init__(
             full_path=full_path,
             model_name=model_name,
             framework=Framework.VLLM,
             device_type=device_type,
-            **kwargs
         )
 
         # check if VLLMConfigs is provided

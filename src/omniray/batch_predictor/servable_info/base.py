@@ -21,7 +21,6 @@ class ServableInfo:
         device_type: DeviceType = DeviceType.CPU,
         full_path: Union[str, None] = None,
         model_name: Union[str, None] = None,
-        **kwargs
     ):
         self.framework = framework
         self.device_type = device_type
