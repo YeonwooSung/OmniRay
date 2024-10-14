@@ -2,6 +2,25 @@
 
 ![OmniRay Architecture](./assets/imgs/architecture.png)
 
+## ToDo
+
+- Data Loader
+    - [ ] Add support for various streaming data sources
+        - [ ] Add support for Kafka
+        - [ ] Add support for Kinesis
+        - [ ] Add support for Redis
+    - [ ] Add support for various batch data sources
+        - [ ] Add support for S3
+        - [ ] Add support for SQLAlchemy Loader
+        - [ ] Add support for MongoDB Loader
+- Model Registry
+    - [v] Add support for S3 registry
+    - [ ] Add support for MLFlow registry
+- Batch Predicor
+    - [ ] Add support for vLLM batch predictor
+    - [ ] Add support for PyTorch batch predictor
+    - [ ] Add support for HuggingFace (with safetensor) batch predictor
+
 ## References
 
 - [Ray Batch Inference at Pinterest (Part 3)](https://medium.com/pinterest-engineering/ray-batch-inference-at-pinterest-part-3-4faeb652e385)
