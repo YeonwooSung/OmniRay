@@ -5,6 +5,11 @@
 ## ToDo
 
 - Data Loader
+    - [x] Add support for huggingface datasets
+    - [x] Add support for PyTorch DataLoader
+    - [x] Add support for numpy DataLoader
+    - [x] Add support for pandas DataLoader
+- Data Connector
     - [ ] Add support for various streaming data sources
         - [ ] Add support for Kafka
         - [ ] Add support for Kinesis
@@ -14,7 +19,7 @@
         - [ ] Add support for SQLAlchemy Loader
         - [ ] Add support for MongoDB Loader
 - Model Registry
-    - [v] Add support for S3 registry
+    - [x] Add support for S3 registry
     - [ ] Add support for MLFlow registry
 - Batch Predicor
     - [ ] Add support for vLLM batch predictor
