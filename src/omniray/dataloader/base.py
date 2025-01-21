@@ -14,6 +14,13 @@ class BaseDataLoader:
     def load(self, path: str, **kwargs):
         raise NotImplementedError("load method is not implemented.")
 
+
+    def get_ray_dataset(self) -> MaterializedDataset:
+        if self.ray_dataset is None:
+            raise ValueError("ray_dataset is None. Please load the dataset first.")
+        return self.ray_dataset
+
+
     def lambda_map_chained(self, funcs: list):
         if isinstance(self.ray_dataset, MaterializedDataset):
             for func in funcs:
