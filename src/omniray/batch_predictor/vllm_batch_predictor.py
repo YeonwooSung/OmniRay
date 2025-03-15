@@ -1,5 +1,9 @@
-from vllm import AsyncLLMEngine, LLMEngine, RequestOutput, SamplingParams
 import ray
+
+try:
+    from vllm import AsyncLLMEngine, LLMEngine, RequestOutput, SamplingParams
+except ImportError:
+    ...
 
 from .base import BatchPredictor
 from .servable_info.vllm_servable_info import VLLMServableInfo, VLLMConfigs

@@ -1,4 +1,7 @@
-from vllm import EngineArgs, SamplingParams, AsyncEngineArgs
+try:
+    from vllm import EngineArgs, SamplingParams, AsyncEngineArgs
+except ImportError:
+    ...
 from typing import Union
 
 from .base import ServableInfo, Framework, DeviceType

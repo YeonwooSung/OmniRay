@@ -2,12 +2,12 @@ from aiokafka import AIOKafkaProducer
 import asyncio
 import argparse
 
+
 parser = argparse.ArgumentParser()
 parser.add_argument('--topic', nargs='?', const='ray-topic', type=str, default='ray-topic')
 parser.add_argument('--message', nargs='?', const='Consuming from Kafka with Ray!', type=str, default='Consuming from Kafka with Ray!')
 parser.add_argument('--kafka', nargs='?', const='localhost:29092', type=str, default='localhost:29092')
 args = parser.parse_args()
-print(args)
 
 
 async def send_one():

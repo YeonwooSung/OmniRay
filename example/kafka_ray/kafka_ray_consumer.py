@@ -1,5 +1,4 @@
 import asyncio
-import ray
 from ray import serve
 from aiokafka import AIOKafkaConsumer
 
