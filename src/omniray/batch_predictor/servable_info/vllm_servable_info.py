@@ -1,7 +1,12 @@
 try:
     from vllm import EngineArgs, SamplingParams, AsyncEngineArgs
 except ImportError:
-    ...
+    from omniray.utils.logging import logger
+
+    logger.log_warning(
+        "VLLM is not installed. Please install it with `pip install vllm`."
+        "VLLM models will not be available for use."
+    )
 from typing import Union
 
 from .base import ServableInfo, Framework, DeviceType

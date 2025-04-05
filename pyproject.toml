@@ -11,4 +11,5 @@ dependencies = [
     "mlflow>=2.21.0",
     "ray[default,serve]>=2.43.0",
     "torch>=2.6.0",
+    "vllm>=0.8.2",
 ]
