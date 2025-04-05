@@ -1,6 +1,10 @@
 # OmniRay
 
+Ray for all ML tasks.
+
 ![OmniRay Architecture](./assets/imgs/architecture.png)
+
+Note: This library is still in active development, and is not stable for production.
 
 ## ToDo
 
