@@ -10,12 +10,12 @@ import itertools
 import simplejson as json
 import torch
 from thrift_utils.utils import thrift_from_binary_data
-from trainer.ppytorch.data.sage_features import SageBatch
-from trainer.ppytorch.data.sage_features import SageFeaturizer
-from trainer.ppytorch.data.sage_features import SageFeaturizerV2
-from trainer.ppytorch.data.sage_features import TaskName
-from trainer.ppytorch.data.sage_features import check_tensor_feats
-from trainer.ppytorch.data.sage_features import filter_features
+from omnisearchsage.data.sage_features import SageBatch
+from omnisearchsage.data.sage_features import SageFeaturizer
+from omnisearchsage.data.sage_features import SageFeaturizerV2
+from omnisearchsage.data.sage_features import TaskName
+from omnisearchsage.data.sage_features import check_tensor_feats
+from omnisearchsage.data.sage_features import filter_features
 from trainer.ppytorch.data.ufr_features import FbsUFRBatchFeatureExtractor
 
 from schemas.graphsage.ttypes import GraphSageMetadata
@@ -24,7 +24,7 @@ from schemas.graphsage_common.ttypes import EntityType
 if TYPE_CHECKING:
     import pyarrow as pa
     from torch import nn
-    from trainer.ppytorch.data.sage_features import RawSageBatch
+    from omnisearchsage.data.sage_features import RawSageBatch
     from trainer.ppytorch.data.sage_s3_db import RawIndexData
     from trainer.ppytorch.data.sage_s3_db import RawPairData
 

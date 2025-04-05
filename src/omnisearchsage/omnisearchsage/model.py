@@ -10,7 +10,7 @@ from typing import Union
 from collections import defaultdict
 from enum import IntEnum
 
-import simplejson as json
+import json
 import torch
 from omnisearchsage.common.solver.basic_solver import BasicSolver
 from omnisearchsage.common.types import EntityType
@@ -18,10 +18,11 @@ from omnisearchsage.modules.metric_learning_softmax import MultiDimSoftmaxCorrec
 from omnisearchsage.modules.sage_embedder import VisualFeatureEmbedder
 from torch import nn
 
+
 if TYPE_CHECKING:
     from torch import Tensor
     from torch.utils.tensorboard import SummaryWriter
-    from trainer.ppytorch.data.sage_features import SageBatch
+    from omnisearchsage.data.sage_features import SageBatch
 
 
 def tensor_feats_to(

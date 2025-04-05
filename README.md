@@ -30,3 +30,8 @@
 
 - [Ray Batch Inference at Pinterest (Part 3)](https://medium.com/pinterest-engineering/ray-batch-inference-at-pinterest-part-3-4faeb652e385)
 - [Batch Predictions in Ray](https://docs.ray.io/en/latest/ray-core/examples/batch_prediction.html)
+
+### OmniSearchSAGE
+
+- [OmniSearchSage: Multi-Task Multi-Entity Embeddings for Pinterest Search](https://arxiv.org/abs/2404.16260)
+    - [pinterest/atg-research](https://github.com/pinterest/atg-research)
