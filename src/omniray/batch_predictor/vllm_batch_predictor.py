@@ -1,7 +1,7 @@
 import ray
 
 try:
-    from vllm import AsyncLLMEngine, LLMEngine, RequestOutput, SamplingParams
+    from vllm import AsyncLLMEngine, LLMEngine
 except ImportError:
     from omniray.utils.logging import logger
 
@@ -15,7 +15,7 @@ from .servable_info.vllm_servable_info import VLLMServableInfo, VLLMConfigs
 
 
 @ray.remote
-class VLLMBatchPredictor(BatchPredictor):
+class VllmBatchPredictor(BatchPredictor):
     def __init__(self, servable_info: VLLMServableInfo):
         super().__init__(servable_info)
 

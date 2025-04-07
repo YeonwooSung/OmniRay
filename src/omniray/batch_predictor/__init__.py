@@ -1,6 +1,6 @@
 from .auto_builder import BatchPredictorFactory
 from .base import BatchPredictor
-from .vllm_batch_predictor import VLLMBatchPredictor
+from .vllm_batch_predictor import VllmBatchPredictor
 
 
 __all__ = [
@@ -9,5 +9,5 @@ __all__ = [
     # base
     "BatchPredictor",
     # vllm_batch_predictor
-    "VLLMBatchPredictor",
+    "VllmBatchPredictor",
 ]

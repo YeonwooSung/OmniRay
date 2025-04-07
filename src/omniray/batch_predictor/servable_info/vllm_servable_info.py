@@ -4,26 +4,26 @@ except ImportError:
     from omniray.utils.logging import logger
 
     logger.log_warning(
-        "VLLM is not installed. Please install it with `pip install vllm`."
-        "VLLM models will not be available for use."
+        "vllm is not installed. Please install it with `pip install vllm`."
+        "vllm models will not be available for use."
     )
 from typing import Union
 
 from .base import ServableInfo, Framework, DeviceType
 
 
-class VLLMConfigs:
+class VllmConfigs:
     engine_args: Union[EngineArgs, AsyncEngineArgs]
     sampling_params: SamplingParams
 
 
-class VLLMServableInfo(ServableInfo):
+class VllmServableInfo(ServableInfo):
     def __init__(
         self,
         full_path: str,
         model_name: str,
         device_type: DeviceType = DeviceType.CUDA,
-        config: Union[VLLMConfigs, None] = None
+        config: Union[VllmConfigs, None] = None
     ):
         super().__init__(
             full_path=full_path,
@@ -44,7 +44,7 @@ class VLLMServableInfo(ServableInfo):
 
         self.config = config
 
-        if not isinstance(self.config, VLLMConfigs):
+        if not isinstance(self.config, VllmConfigs):
             raise ValueError("config must be an instance of VLLMConfigs.")
 
         # check if engine_args is either EngineArgs or AsyncEngineArgs, and set is_async_engine
