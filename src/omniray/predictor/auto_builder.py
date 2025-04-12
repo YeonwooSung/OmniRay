@@ -1,12 +1,12 @@
-from .base import BatchPredictor
+from .base import Predictor
 from .vllms import VllmPredictor
 
 from .servable_info import ServableInfo, Framework
 
 
-class BatchPredictorFactory:
+class PredictorFactory:
     @staticmethod
-    def from_servable_info(servable_info: ServableInfo) -> BatchPredictor:
+    def from_servable_info(servable_info: ServableInfo) -> Predictor:
         if servable_info.framework == Framework.VLLM:
             return VllmPredictor(servable_info)
         else:

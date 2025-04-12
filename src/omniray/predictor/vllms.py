@@ -11,12 +11,12 @@ except ImportError:
     )
 
 # custom modules
-from .base import BatchPredictor
+from .base import Predictor
 from .servable_info.vllm_servable import VllmConfigs, VllmServableInfo
 
 
 @ray.remote
-class VllmPredictor(BatchPredictor):
+class VllmPredictor(Predictor):
     def __init__(self, servable_info: VllmServableInfo):
         super().__init__(servable_info)
 

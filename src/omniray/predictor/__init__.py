@@ -1,13 +1,13 @@
-from .auto_builder import BatchPredictorFactory
-from .base import BatchPredictor
+from .auto_builder import PredictorFactory
+from .base import Predictor
 from .vllms import VllmPredictor
 
 
 __all__ = [
     # auto_builder
-    "BatchPredictorFactory",
+    "PredictorFactory",
     # base
-    "BatchPredictor",
+    "Predictor",
     # vllm_batch_predictor
     "VllmPredictor",
 ]
