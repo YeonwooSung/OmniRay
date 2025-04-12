@@ -37,10 +37,10 @@ class VllmServableInfo(ServableInfo):
 
         if device_type is not DeviceType.CUDA:
             if device_type is DeviceType.CPU:
-                print("VLLM model is loaded on CPU device.")
+                print("vllm model is loaded on CPU device.")
                 print("This may cause a significant slowdown in model inference.")
             else:
-                raise ValueError("VLLM model must be loaded on CUDA device.")
+                raise ValueError("vllm model must be loaded on CUDA device.")
 
         self.config = config
 

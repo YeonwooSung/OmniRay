@@ -10,16 +10,17 @@ except ImportError:
         "VLLM models will not be available for use."
     )
 
+# custom modules
 from .base import BatchPredictor
-from .servable_info.vllm_servable_info import VLLMServableInfo, VLLMConfigs
+from .servable_info.vllm_servable import VllmConfigs, VllmServableInfo
 
 
 @ray.remote
-class VllmBatchPredictor(BatchPredictor):
-    def __init__(self, servable_info: VLLMServableInfo):
+class VllmPredictor(BatchPredictor):
+    def __init__(self, servable_info: VllmServableInfo):
         super().__init__(servable_info)
 
-        config: VLLMConfigs = servable_info.config
+        config: VllmConfigs = servable_info.config
 
         if servable_info.is_async_engine:
             self.engine = AsyncLLMEngine.from_engine_args(config.engine_args)
@@ -30,5 +31,9 @@ class VllmBatchPredictor(BatchPredictor):
         return self.servable_info.is_async_engine
 
     def predict(self, data):
+        #TODO Implement VLLM model inference
+        pass
+
+    def predict_in_batch(self, data):
         #TODO Implement VLLM model inference
         pass
