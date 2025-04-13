@@ -1,6 +1,6 @@
 from .base import ServableInfo, DeviceType, Framework
 from .vllm_servable import VllmServableInfo, VllmConfigs
-from .hf_transformers import TransformersServableInfo
+from .hf_transformers import ENUM_OF_HF_MODELS, HfModelType, HfServableInfo
 
 
 __all__ = [
@@ -11,5 +11,7 @@ __all__ = [
     "VllmServableInfo",
     "VllmConfigs",
     # hf_transformers
-    "TransformersServableInfo",
+    "HfServableInfo",
+    "ENUM_OF_HF_MODELS",
+    "HfModelType",
 ]
