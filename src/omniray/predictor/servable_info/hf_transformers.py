@@ -35,6 +35,7 @@ class HfServableInfo(ServableInfo):
         )
         self.is_async_engine = False
         self.max_batch_size = max_batch_size
+        self.device = torch.device("cpu")
 
         if type_of_model not in ENUM_OF_HF_MODELS:
             raise ValueError(

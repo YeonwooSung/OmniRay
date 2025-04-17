@@ -55,6 +55,7 @@ class HfTextClassificationPredictor(Predictor):
         super().__init__(servable_info)
 
         self.model_name = servable_info.model_name
+        self.device = servable_info.device
 
         if servable_info.type_of_model == HfModelType.SEQUENCE_CLASSIFICATION.value:
             self.model = AutoModelForSequenceClassification.from_pretrained(self.model_name)
@@ -79,9 +80,14 @@ class HfTextClassificationPredictor(Predictor):
         else:
             raise ValueError("Unsupported input type. Expected str, list, or torch.Tensor.")
 
-        if self.servable_info.device is not None:
-            inputs = {k: v.to(self.servable_info.device) for k, v in inputs.items()}
+        if self.device is not None:
+            if isinstance(inputs, torch.Tensor):
+                inputs = inputs.to(self.device)
+                with torch.no_grad():
+                    outputs = self.model(inputs)
+            else:
+                inputs = {k: v.to(self.device) for k, v in inputs.items()}
+                with torch.no_grad():
+                    outputs = self.model(**inputs)
 
-        with torch.no_grad():
-            outputs = self.model(**inputs)
         return outputs
