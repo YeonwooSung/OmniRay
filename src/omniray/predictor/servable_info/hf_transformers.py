@@ -45,8 +45,6 @@ class HfServableInfo(ServableInfo):
         if device_type not in {DeviceType.CUDA, DeviceType.CPU, DeviceType.METAL}:
             raise ValueError(f"Unsupported device type {device_type} :: HuggingFace model must be loaded on CUDA or CPU device.")
 
-        self.device_type = device_type
-
         if device_type is DeviceType.CUDA:
             if not torch.cuda.is_available():
                 raise ValueError("CUDA is not available. Please check your CUDA installation.")
