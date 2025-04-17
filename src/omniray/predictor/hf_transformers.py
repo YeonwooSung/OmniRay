@@ -70,6 +70,7 @@ class HfTextClassificationPredictor(Predictor):
             self.model.to(servable_info.device)
 
 
+    @torch.inference_mode()
     def predict(self, data):
         if isinstance(data, str):
             inputs = self.tokenizer(data, return_tensors="pt")
@@ -83,11 +84,9 @@ class HfTextClassificationPredictor(Predictor):
         if self.device is not None:
             if isinstance(inputs, torch.Tensor):
                 inputs = inputs.to(self.device)
-                with torch.no_grad():
-                    outputs = self.model(inputs)
+                outputs = self.model(inputs)
             else:
                 inputs = {k: v.to(self.device) for k, v in inputs.items()}
-                with torch.no_grad():
-                    outputs = self.model(**inputs)
+                outputs = self.model(**inputs)
 
         return outputs

@@ -27,7 +27,7 @@ Note: This library is still in active development, and is not stable for product
     - [x] Add support for MLFlow registry
 - Batch Predicor
     - [ ] Add support for vLLM batch predictor
-    - [ ] Add support for PyTorch batch predictor
+    - [x] Add support for PyTorch batch predictor
     - [x] Add support for HuggingFace (with safetensor) batch predictor
 
 ## References

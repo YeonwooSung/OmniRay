@@ -1,8 +1,14 @@
 import torch
 from typing import Union
+from enum import Enum
 
 # custom modules
 from .base import ServableInfo, DeviceType, Framework
+
+
+class TorchModelType(Enum):
+    TORCH_NN = "torch.nn"
+    TORCH_SCRIPT = "torch.jit"
 
 
 class TorchServableInfo(ServableInfo):
@@ -10,7 +16,9 @@ class TorchServableInfo(ServableInfo):
         self,
         device_type: DeviceType = DeviceType.CPU,
         full_path: Union[str, None] = None,
-        model_name: Union[str, None] = None
+        model_name: Union[str, None] = None,
+        model_type: TorchModelType = TorchModelType.TORCH_NN,
+        state_dict_path: Union[str, None] = None,
     ):
         super().__init__(Framework.TORCH, device_type, full_path, model_name)
 
@@ -29,3 +37,9 @@ class TorchServableInfo(ServableInfo):
             if not torch.backends.mps.is_available():
                 raise ValueError("MPS is not available. Please check your MPS installation.")
             self.device = torch.device("mps")
+
+        else:
+            raise ValueError(f"Unsupported device type {device_type} :: Torch model must be loaded on CUDA or CPU device.")
+
+        self.model_type = model_type
+        self.state_dict_path = state_dict_path

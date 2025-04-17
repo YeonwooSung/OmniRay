@@ -1,6 +1,7 @@
 from .base import Predictor
 from .vllms import VllmPredictor
 from .hf_transformers import HfModelPredictor, HfTextClassificationPredictor
+from .torch import TorchPredictor
 from .servable_info import (
     ENUM_OF_HF_MODELS,
     ServableInfo,
@@ -19,8 +20,7 @@ class PredictorFactory:
             return PredictorFactory.get_hf_model_from_servable_info(servable_info)
 
         elif servable_info.framework == Framework.TORCH:
-            #TODO: Implement TorchPredictor
-            pass
+            return TorchPredictor(servable_info)
 
         else:
             raise ValueError(f"Unsupported framework: {servable_info.framework}")
