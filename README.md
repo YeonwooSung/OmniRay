@@ -13,15 +13,6 @@ Note: This library is still in active development, and is not stable for product
     - [x] Add support for PyTorch DataLoader
     - [x] Add support for numpy DataLoader
     - [x] Add support for pandas DataLoader
-- Data Connector
-    - [ ] Add support for various streaming data sources
-        - [ ] Add support for Kafka
-        - [ ] Add support for Kinesis
-        - [ ] Add support for Redis
-    - [ ] Add support for various batch data sources
-        - [ ] Add support for S3
-        - [ ] Add support for SQLAlchemy Loader
-        - [ ] Add support for MongoDB Loader
 - Model Registry
     - [x] Add support for S3 registry
     - [x] Add support for MLFlow registry
@@ -29,6 +20,8 @@ Note: This library is still in active development, and is not stable for product
     - [ ] Add support for vLLM batch predictor
     - [x] Add support for PyTorch batch predictor
     - [x] Add support for HuggingFace (with safetensor) batch predictor
+- [ ] Preprocessor
+- [ ] Postprocessor
 
 ## References
 
