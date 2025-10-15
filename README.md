@@ -17,8 +17,8 @@ Note: This library is still in active development, and is not stable for product
 - Model Registry
     - [x] Add support for S3 registry
     - [x] Add support for MLFlow registry
-- Batch Predicor
-    - [ ] Add support for vLLM batch predictor
+- Batch Predictor
+    - [x] Add support for vLLM batch predictor
     - [x] Add support for PyTorch batch predictor
     - [x] Add support for HuggingFace (with safetensor) batch predictor
 - [ ] Preprocessor
