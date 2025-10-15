@@ -26,7 +26,7 @@ class TorchPredictor(Predictor):
             self.model = model_obj
             # load the model state dict if provided
             if servable_info.state_dict_path is not None and os.path.exists(servable_info.state_dict_path):
-                self.model.load_state_dict(torch.load(servable_info.full_path))
+                self.model.load_state_dict(torch.load(servable_info.state_dict_path))
 
         elif servable_info.model_type == TorchModelType.TORCH_SCRIPT:
             self.model = torch.jit.load(servable_info.full_path)
