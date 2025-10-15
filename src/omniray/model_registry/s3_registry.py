@@ -37,11 +37,12 @@ class S3ModelRegistry(ModelRegistry):
             model_name = os.path.join(self.prefix, model_name)
 
         # Upload model file to S3
+        # upload_file expects: Filename, Bucket, Key as positional args
+        # TransferConfig is not supported via Config parameter
         self.s3.upload_file(
             model_file_path,
             self.bucket_name,
-            model_name,
-            Config=self.transfer_config
+            model_name
         )
 
 
@@ -51,17 +52,20 @@ class S3ModelRegistry(ModelRegistry):
             model_name = os.path.join(self.prefix, model_name)
 
         # Download model file from S3
+        # download_file expects: Bucket, Key, Filename as positional args
         self.s3.download_file(
             self.bucket_name,
             model_name,
-            model_name,
-            Config=self.transfer_config
+            model_name
         )
 
 
     def list(self) -> list:
         # List all objects in the bucket
         response = self.s3.list_objects_v2(Bucket=self.bucket_name)
+        # Handle case when bucket is empty (Contents key may not exist)
+        if "Contents" not in response:
+            return []
         return [obj["Key"] for obj in response["Contents"]]
 
 
@@ -78,9 +82,10 @@ class S3ModelRegistry(ModelRegistry):
         # List all objects in the bucket
         response = self.s3.list_objects_v2(Bucket=self.bucket_name)
 
-        # Delete all objects in the bucket
-        for obj in response["Contents"]:
-            self.s3.delete_object(Bucket=self.bucket_name, Key=obj["Key"])
+        # Delete all objects in the bucket (check if Contents exists)
+        if "Contents" in response:
+            for obj in response["Contents"]:
+                self.s3.delete_object(Bucket=self.bucket_name, Key=obj["Key"])
 
 
     def __len__(self) -> int:
