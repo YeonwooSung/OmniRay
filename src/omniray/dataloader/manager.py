@@ -106,6 +106,7 @@ class OmniRayManager:
             self.logger.info(f"Setting object store memory to {object_store_memory/(1024**3):.1f}GB")
             return object_store_memory
         except Exception as e:
+            self.logger.warning(f"Failed to calculate object store memory: {e}")
             # Fallback to Ray's default
             return None
 

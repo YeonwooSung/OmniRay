@@ -330,7 +330,7 @@ class HuggingfaceDataLoader(BaseDataLoader):
                     'citation': getattr(self.dataset, 'citation', None),
                 }
             except Exception as e:
-                pass
+                self.logger.warning(f"Failed to get HuggingFace dataset info: {e}")
         
         if self.ray_dataset is not None:
             info.update(self.get_stats())
@@ -355,6 +355,7 @@ class HuggingfaceDataLoader(BaseDataLoader):
                 num_partitions = num_cpus * 2  # 2x overpartitioning
                 
             except Exception as e:
+                self.logger.warning(f"Failed to detect cluster resources: {e}")
                 num_partitions = 8  # Default fallback
         
         try:

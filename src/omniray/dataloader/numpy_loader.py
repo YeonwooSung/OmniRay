@@ -460,6 +460,6 @@ class NumpyDataLoader(BaseDataLoader):
                         'sample_mean': float(np.mean(data_sample))
                     }
             except Exception as e:
-                pass
+                self.logger.warning(f"Failed to get sample data info: {e}")
                 
         return info
