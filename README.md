@@ -7,10 +7,14 @@ OmniRay leverages Ray Data and Ray's distributed computing capabilities to provi
 ## Features
 
 - **Video Frame Processing**: Load and process video files efficiently using Ray Data
-- **Multiple Model Support**:
   - Object Detection (YOLOv8)
   - Emotion Analysis (py-feat)
   - Custom Models (YAML configuration)
+- **Speech-to-Text (STT)**: Transcribe audio/video with Faster Whisper
+  - Multi-language support (90+ languages)
+  - Automatic language detection
+  - Translation to English
+  - Export to SRT/VTT subtitles
 - **Scalable Ray-based Inference**: Distributed processing across CPUs/GPUs
 - **Flexible Configuration**: Python API or YAML configuration files
 - **Extensible Architecture**: Easy to add new model types and data sources
@@ -101,7 +105,46 @@ pipeline = VideoInferencePipeline(config)
 results = pipeline.run()
 ```
 
-### 4. Using YAML Configuration
+### 4. Speech-to-Text (STT)
+
+```python
+from omniray import (
+    AudioConfig,
+    FasterWhisperConfig,
+    STTInferenceConfig,
+    STTModelType,
+    STTInferencePipeline,
+)
+
+# Configure STT pipeline
+config = STTInferenceConfig(
+    model_type=STTModelType.FASTER_WHISPER,
+    audio_config=AudioConfig(
+        audio_path="audio.mp3",
+        chunk_length_s=30.0,
+        batch_size=8,
+    ),
+    faster_whisper_config=FasterWhisperConfig(
+        model_size="base",  # tiny, base, small, medium, large-v3
+        language="en",  # or None for auto-detect
+        task="transcribe",  # or "translate" for English translation
+    ),
+    output_path="results/transcription.json"
+)
+
+# Run transcription
+pipeline = STTInferencePipeline(config)
+results = pipeline.run()
+
+# Get full transcription
+text = pipeline.get_full_transcription()
+print(text)
+
+# Save as subtitles
+pipeline.save_results("results/subtitles.srt")
+```
+
+### 5. Using YAML Configuration
 
 ```bash
 # Create a config file (see examples/config_object_detection.yaml)
@@ -113,31 +156,47 @@ python examples/run_from_config.py examples/config_object_detection.yaml
 ```
 omniray/
 ├── config/          # Configuration schemas
-├── core/            # Pipeline orchestration
-├── data/            # Data loading (video, etc.)
-└── models/          # Model wrappers
-    ├── base.py      # Base model interface
-    ├── detection.py # Object detection
-    ├── emotion.py   # Emotion analysis
-    └── custom.py    # Custom model loader
+├── core/            # Video pipeline orchestration
+├── data/            # Data loaders (video, audio)
+│   ├── video_loader.py  # Video frame loading
+│   └── audio_loader.py  # Audio chunk loading
+├── models/          # Vision model wrappers
+│   ├── base.py      # Base model interface
+│   ├── detection.py # Object detection
+│   ├── emotion.py   # Emotion analysis
+│   └── custom.py    # Custom model loader
+└── stt/             # Speech-to-Text models
+    ├── base.py          # Base STT interface
+    ├── faster_whisper.py # Faster Whisper
+    └── pipeline.py      # STT pipeline
 ```
 
 ## Examples
 
 See the [examples/](examples/) directory for complete examples:
-- [example_object_detection.py](examples/example_object_detection.py)
-- [example_emotion_analysis.py](examples/example_emotion_analysis.py)
-- [example_custom_model.py](examples/example_custom_model.py)
-- [run_from_config.py](examples/run_from_config.py)
+
+**Video Processing:**
+- [example_object_detection.py](examples/example_object_detection.py) - Object detection with YOLOv8
+- [example_emotion_analysis.py](examples/example_emotion_analysis.py) - Facial emotion analysis
+- [example_custom_model.py](examples/example_custom_model.py) - Custom model integration
+
+**Speech-to-Text:**
+- [example_stt_faster_whisper.py](examples/example_stt_faster_whisper.py) - Basic STT with Faster Whisper
+- [example_stt_multilanguage.py](examples/example_stt_multilanguage.py) - Multi-language transcription
+
+**Configuration:**
+- [run_from_config.py](examples/run_from_config.py) - Run from YAML config files
 
 ## Roadmap
 
-- [ ] Language model inference support
-- [ ] Speech-to-text (STT) pipeline
+- [x] Video inference pipeline (Object detection, Emotion analysis)
+- [x] Speech-to-text (STT) pipeline with Faster Whisper
+- [ ] Language model inference support (vLLM integration)
+- [ ] Multi-modal pipelines (Video + Audio fusion)
 - [ ] Training pipeline integration
 - [ ] ETL data preprocessing pipelines
-- [ ] Multi-modal fusion pipelines
 - [ ] Streaming inference support
+- [ ] Additional STT backends (OpenAI Whisper, Wav2Vec2)
 
 ## References
 

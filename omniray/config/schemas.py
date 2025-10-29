@@ -7,10 +7,17 @@ from pydantic import BaseModel, Field
 
 
 class ModelType(str, Enum):
-    """Supported model types."""
+    """Supported model types for vision tasks."""
 
     OBJECT_DETECTION = "object_detection"
     EMOTION_ANALYSIS = "emotion_analysis"
+    CUSTOM = "custom"
+
+
+class STTModelType(str, Enum):
+    """Supported STT model types."""
+
+    FASTER_WHISPER = "faster_whisper"
     CUSTOM = "custom"
 
 
@@ -40,6 +47,39 @@ class CustomModelConfig(BaseModel):
     )
 
 
+class AudioConfig(BaseModel):
+    """Audio loading configuration."""
+
+    audio_path: str = Field(..., description="Path to the audio/video file")
+    batch_size: int = Field(default=16, description="Batch size for audio chunk processing")
+    chunk_length_s: float = Field(default=30.0, description="Length of each audio chunk in seconds")
+    sample_rate: int = Field(default=16000, description="Target sample rate for audio")
+    max_duration_s: Optional[float] = Field(
+        default=None, description="Maximum audio duration to process in seconds"
+    )
+
+
+class FasterWhisperConfig(BaseModel):
+    """Configuration for Faster Whisper model."""
+
+    model_size: str = Field(
+        default="base",
+        description="Model size: tiny, base, small, medium, large-v2, large-v3",
+    )
+    device: str = Field(default="auto", description="Device: auto, cpu, cuda")
+    compute_type: str = Field(
+        default="default",
+        description="Compute type: default, int8, int8_float16, int8_float32, float16, float32",
+    )
+    language: Optional[str] = Field(default=None, description="Language code (e.g., 'en', 'ko')")
+    task: str = Field(default="transcribe", description="Task: transcribe or translate")
+    beam_size: int = Field(default=5, description="Beam size for decoding")
+    vad_filter: bool = Field(default=True, description="Enable voice activity detection filter")
+    vad_parameters: Optional[Dict[str, Any]] = Field(
+        default=None, description="VAD filter parameters"
+    )
+
+
 class InferenceConfig(BaseModel):
     """Main inference pipeline configuration."""
 
@@ -56,4 +96,34 @@ class InferenceConfig(BaseModel):
     def model_post_init(self, __context: Any) -> None:
         """Validate configuration after initialization."""
         if self.model_type == ModelType.CUSTOM and self.custom_model_config is None:
+            raise ValueError("custom_model_config is required when model_type is CUSTOM")
+
+
+class STTInferenceConfig(BaseModel):
+    """STT inference pipeline configuration."""
+
+    model_type: STTModelType = Field(..., description="Type of STT model to use")
+    audio_config: AudioConfig = Field(..., description="Audio loading configuration")
+    faster_whisper_config: Optional[FasterWhisperConfig] = Field(
+        default=None,
+        description="Faster Whisper configuration (required if model_type is FASTER_WHISPER)",
+    )
+    custom_model_config: Optional[CustomModelConfig] = Field(
+        default=None, description="Custom model configuration (required if model_type is CUSTOM)"
+    )
+    ray_options: Dict[str, Any] = Field(
+        default_factory=dict, description="Ray-specific options (e.g., num_gpus, num_cpus)"
+    )
+    output_path: Optional[str] = Field(default=None, description="Path to save transcription results")
+
+    def model_post_init(self, __context: Any) -> None:
+        """Validate configuration after initialization."""
+        if (
+            self.model_type == STTModelType.FASTER_WHISPER
+            and self.faster_whisper_config is None
+        ):
+            # Provide default config
+            self.faster_whisper_config = FasterWhisperConfig()
+
+        if self.model_type == STTModelType.CUSTOM and self.custom_model_config is None:
             raise ValueError("custom_model_config is required when model_type is CUSTOM")

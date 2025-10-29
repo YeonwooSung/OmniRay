@@ -1,0 +1,25 @@
+# Faster Whisper STT Configuration Example
+
+model_type: faster_whisper
+
+audio_config:
+  audio_path: "path/to/your/audio.mp3"
+  chunk_length_s: 30.0  # Process in 30-second chunks
+  batch_size: 8
+  sample_rate: 16000
+  max_duration_s: null  # Process entire file
+
+faster_whisper_config:
+  model_size: "base"  # tiny, base, small, medium, large-v2, large-v3
+  device: "auto"  # auto, cpu, cuda
+  compute_type: "default"  # default, int8, int8_float16, float16, float32
+  language: null  # null for auto-detect, or 'en', 'ko', 'ja', etc.
+  task: "transcribe"  # transcribe or translate
+  beam_size: 5
+  vad_filter: true  # Enable voice activity detection
+
+ray_options:
+  num_cpus: 4
+  num_gpus: 0  # Set to 1 for GPU acceleration
+
+output_path: "results/transcription.json"

@@ -3,7 +3,7 @@
 import json
 import logging
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Dict, List
 
 import ray
 from ray.data import Dataset
@@ -13,6 +13,7 @@ from omniray.data.video_loader import load_video_frames
 from omniray.models.custom import CustomModel
 from omniray.models.detection import ObjectDetectionModel
 from omniray.models.emotion import EmotionAnalysisModel
+
 
 logger = logging.getLogger(__name__)
 
@@ -105,6 +106,7 @@ class VideoInferencePipeline:
         logger.info("Running inference on video frames")
 
         # Use map_batches for efficient batch processing
+        # (ray data distributed inference)
         results_dataset = dataset.map_batches(
             lambda batch: self._inference_fn(batch),
             batch_size=self.config.video_config.batch_size,
