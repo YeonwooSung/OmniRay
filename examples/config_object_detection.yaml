@@ -1,0 +1,16 @@
+# Object Detection Configuration Example
+
+model_type: object_detection
+
+video_config:
+  video_path: "path/to/your/video.mp4"
+  batch_size: 32
+  frame_skip: 1
+  max_frames: null  # Process all frames
+  target_size: null  # Keep original size
+
+ray_options:
+  num_cpus: 4
+  num_gpus: 0  # Set to 1 if GPU is available
+
+output_path: "results/detection_results.json"

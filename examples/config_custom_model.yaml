@@ -1,0 +1,33 @@
+# Custom Model Configuration Example
+
+model_type: custom
+
+video_config:
+  video_path: "path/to/your/video.mp4"
+  batch_size: 32
+  frame_skip: 1
+  max_frames: null
+  target_size: [640, 480]  # Optional: resize frames
+
+custom_model_config:
+  model_class: "mymodels.MyCustomModel"  # Fully qualified class name
+  model_path: "path/to/model/weights.pth"  # Optional
+  model_kwargs:
+    num_classes: 10
+    input_size: 224
+    dropout: 0.5
+
+  preprocessing:
+    resize: [224, 224]
+    normalize:
+      mean: [0.485, 0.456, 0.406]
+      std: [0.229, 0.224, 0.225]
+
+  postprocessing:
+    threshold: 0.5
+
+ray_options:
+  num_cpus: 4
+  num_gpus: 1
+
+output_path: "results/custom_results.parquet"
