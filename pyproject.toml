@@ -1,6 +1,6 @@
 [project]
 name = "omniray"
-version = "0.2.0"
+version = "0.2.1"
 description = "Ray-based scalable AI-intensive system"
 readme = "README.md"
 requires-python = "<3.13,>=3.10"

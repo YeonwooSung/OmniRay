@@ -2,7 +2,7 @@
 OmniRay: Ray-based scalable AI-intensive system.
 """
 
-__VERSION__ = "0.2.0"
+__VERSION__ = "0.2.1"
 
 # Video inference
 from omniray.config import InferenceConfig, ModelType, VideoConfig
