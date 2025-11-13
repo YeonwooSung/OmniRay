@@ -15,6 +15,11 @@ OmniRay leverages Ray Data and Ray's distributed computing capabilities to provi
   - Automatic language detection
   - Translation to English
   - Export to SRT/VTT subtitles
+- **Pseudo Labeling & Training**: Generate pseudo labels and train models with Ray
+  - Automated emotion label generation from videos
+  - Training dataset preparation utilities
+  - Distributed training with Ray Train
+  - Label storage in multiple formats (JSON, CSV, Parquet)
 - **Scalable Ray-based Inference**: Distributed processing across CPUs/GPUs
 - **Flexible Configuration**: Python API or YAML configuration files
 - **Extensible Architecture**: Easy to add new model types and data sources
@@ -165,10 +170,16 @@ omniray/
 │   ├── detection.py # Object detection
 │   ├── emotion.py   # Emotion analysis
 │   └── custom.py    # Custom model loader
-└── stt/             # Speech-to-Text models
-    ├── base.py          # Base STT interface
-    ├── faster_whisper.py # Faster Whisper
-    └── pipeline.py      # STT pipeline
+├── stt/             # Speech-to-Text models
+│   ├── base.py          # Base STT interface
+│   ├── faster_whisper.py # Faster Whisper
+│   └── pipeline.py      # STT pipeline
+├── labeling/        # Pseudo labeling utilities
+│   ├── emotion_labeler.py  # Emotion pseudo labeler
+│   └── label_storage.py    # Label storage & management
+└── training/        # Training pipelines
+    ├── __init__.py      # Dataset preparation
+    └── trainer.py       # Ray-based distributed training
 ```
 
 ## Examples
@@ -184,19 +195,31 @@ See the [examples/](examples/) directory for complete examples:
 - [example_stt_faster_whisper.py](examples/example_stt_faster_whisper.py) - Basic STT with Faster Whisper
 - [example_stt_multilanguage.py](examples/example_stt_multilanguage.py) - Multi-language transcription
 
+**Pseudo Labeling & Training:**
+- [example_pseudo_labeling_training.py](examples/example_pseudo_labeling_training.py) - Full pseudo labeling and training pipeline
+- [example_pseudo_labeling_from_config.py](examples/example_pseudo_labeling_from_config.py) - Run from YAML config
+
 **Configuration:**
 - [run_from_config.py](examples/run_from_config.py) - Run from YAML config files
+
+## Documentation
+
+- [STT Guide](docs/stt_guide.md) - Comprehensive Speech-to-Text usage guide
+- [Pseudo Labeling Guide](docs/pseudo_labeling_guide.md) - Pseudo labeling and training guide
+- [Helpful Resources](docs/helpful_resources.md) - Additional resources and references
 
 ## Roadmap
 
 - [x] Video inference pipeline (Object detection, Emotion analysis)
 - [x] Speech-to-text (STT) pipeline with Faster Whisper
+- [x] Pseudo labeling for emotion recognition
+- [x] Training pipeline integration with Ray Train
 - [ ] Language model inference support (vLLM integration)
 - [ ] Multi-modal pipelines (Video + Audio fusion)
-- [ ] Training pipeline integration
 - [ ] ETL data preprocessing pipelines
 - [ ] Streaming inference support
 - [ ] Additional STT backends (OpenAI Whisper, Wav2Vec2)
+- [ ] Active learning with pseudo labels
 
 ## References
 

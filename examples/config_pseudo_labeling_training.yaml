@@ -1,0 +1,83 @@
+# Pseudo Labeling and Training Configuration
+
+# Video Input Configuration
+video_config:
+  video_paths:
+    - "path/to/your/video1.mp4"
+    - "path/to/your/video2.mp4"
+  batch_size: 16
+  frame_skip: 5  # Process every 5th frame
+  max_frames: 500  # null for all frames
+
+# Pseudo Labeling Configuration
+pseudo_labeling:
+  detector: "retinaface"  # Options: retinaface, mtcnn, faceboxes
+  au_model: "xgb"  # Options: svm, xgb, rf
+  emotion_model: "resmasknet"  # Options: svm, resmasknet
+  confidence_threshold: 0.6  # Minimum confidence for valid labels
+  output_dir: "./pseudo_labels"
+  label_format: "json"  # Options: json, csv, parquet
+  save_frames: false  # Whether to save extracted frames
+
+# Training Dataset Configuration
+dataset:
+  min_confidence: 0.7  # Filter labels by confidence
+  target_size: [224, 224]  # Image size (width, height)
+  split_ratio: [0.7, 0.15, 0.15]  # train, val, test
+  
+  # Data augmentation (for training)
+  augmentation:
+    enabled: true
+    random_flip: true
+    random_rotation: 15
+    color_jitter:
+      brightness: 0.2
+      contrast: 0.2
+      saturation: 0.2
+
+# Model Configuration
+model:
+  architecture: "simple_cnn"  # Custom model architecture
+  num_classes: 7  # Number of emotion classes
+  pretrained: false
+  
+  # Emotion classes mapping (optional)
+  emotion_classes:
+    - "anger"
+    - "disgust"
+    - "fear"
+    - "happiness"
+    - "sadness"
+    - "surprise"
+    - "neutral"
+
+# Training Configuration
+training:
+  epochs: 20
+  batch_size: 32
+  learning_rate: 0.001
+  weight_decay: 0.00001
+  optimizer: "adam"  # Options: adam, sgd, adamw
+  
+  # Learning rate scheduler
+  scheduler:
+    type: "step"  # Options: step, cosine, reduce_on_plateau
+    step_size: 5
+    gamma: 0.1
+  
+  # Checkpointing
+  checkpoint_freq: 2  # Save checkpoint every N epochs
+  checkpoint_dir: "./checkpoints"
+
+# Ray Configuration
+ray:
+  num_workers: 2  # Number of distributed workers
+  num_cpus: 4
+  num_gpus: 0  # Set to number of GPUs available
+  use_gpu: false
+
+# Output Configuration
+output:
+  results_dir: "./emotion_training_results"
+  save_predictions: true
+  log_frequency: 10  # Log every N batches
