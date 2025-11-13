@@ -206,6 +206,8 @@ See the [examples/](examples/) directory for complete examples:
 
 - [STT Guide](docs/stt_guide.md) - Comprehensive Speech-to-Text usage guide
 - [Pseudo Labeling Guide](docs/pseudo_labeling_guide.md) - Pseudo labeling and training guide
+- [Full Frame Extraction Guide](docs/full_frame_extraction_guide.md) - Complete frame extraction pipeline
+- [Troubleshooting](docs/troubleshooting.md) - Common issues and solutions
 - [Helpful Resources](docs/helpful_resources.md) - Additional resources and references
 
 ## Roadmap

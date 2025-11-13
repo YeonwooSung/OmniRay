@@ -52,11 +52,29 @@ class EmotionAnalysisModel(BaseModel):
             )
 
             logger.info("py-feat detector loaded successfully")
-        except ImportError:
-            raise ImportError(
-                "py-feat package is required for emotion analysis. "
-                "Install it with: pip install py-feat"
-            )
+        except ImportError as ie:
+            error_msg = str(ie)
+            logger.error(f"Import error: {error_msg}")
+            
+            # Check for scipy version issue
+            if "binom_test" in error_msg or "scipy" in error_msg.lower():
+                raise ImportError(
+                    "py-feat is not compatible with scipy 1.13+. "
+                    "Please install scipy 1.12.0 or earlier:\n"
+                    "  pip install 'scipy>=1.10.0,<1.13.0'\n"
+                    "Or using uv:\n"
+                    "  uv pip install 'scipy>=1.10.0,<1.13.0'\n"
+                    f"Original error: {error_msg}"
+                )
+            else:
+                raise ImportError(
+                    "py-feat package is required for emotion analysis. "
+                    f"Install it with: pip install py-feat\n"
+                    f"Original error: {error_msg}"
+                )
+        except Exception as e:
+            logger.error(f"Error loading py-feat detector: {e}")
+            raise
 
     def predict(self, frame: np.ndarray, **kwargs) -> Dict[str, Any]:
         """Run emotion analysis on frame.
