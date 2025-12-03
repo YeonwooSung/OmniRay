@@ -5,8 +5,8 @@
 # Video Input Configuration
 video_config:
   video_paths:
-    - "path/to/your/video1.mp4"
-    - "path/to/your/video2.mp4"
+    - "/Users/yeonwoosung/Desktop/emology_data/converted.mp4"
+    - "/Users/yeonwoosung/Desktop/emology_data/a3_first5.mp4"
   batch_size: 16
   frame_skip: 1  # Process EVERY frame (no skip)
   max_frames: null  # Process ALL frames (null = no limit)

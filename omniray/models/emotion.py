@@ -1,7 +1,7 @@
 """Emotion analysis model using py-feat."""
 
 import logging
-from typing import Any, Dict
+from typing import Any, Dict, List, Union
 
 import numpy as np
 
@@ -76,31 +76,60 @@ class EmotionAnalysisModel(BaseModel):
             logger.error(f"Error loading py-feat detector: {e}")
             raise
 
-    def predict(self, frame: np.ndarray, **kwargs) -> Dict[str, Any]:
-        """Run emotion analysis on frame.
+    def predict(self, frames: np.ndarray, **kwargs) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
+        """Run emotion analysis on frame(s).
 
         Args:
-            frame: Input frame as numpy array (H, W, C) in RGB format
+            frames: Input frame(s) as numpy array
+                    - Single frame: (H, W, C) in RGB format
+                    - Batch of frames: (B, H, W, C) in RGB format
             **kwargs: Additional prediction arguments
 
         Returns:
-            Dictionary containing emotion analysis results:
-                - faces: List of face detections with emotions
-                - num_faces: Number of faces detected
+            For single frame:
+                Dictionary containing emotion analysis results:
+                    - faces: List of face detections with emotions
+                    - num_faces: Number of faces detected
+            For batch:
+                List of dictionaries, one per frame in batch
         """
         if self.detector is None:
             self.load_model()
 
+        # Handle both single frame and batched frames
+        is_batch = len(frames.shape) == 4
+        
+        if is_batch:
+            # Process batch of frames - return list of results
+            batch_results = []
+            for frame in frames:
+                result = self._detect_single_frame(frame)
+                batch_results.append(result)
+            return batch_results
+        else:
+            # Process single frame - return single result dict
+            return self._detect_single_frame(frames)
+    
+    def _detect_single_frame(self, frame: np.ndarray) -> Dict[str, Any]:
+        """Detect emotions in a single frame.
+        
+        Args:
+            frame: Single frame as numpy array (H, W, C) in RGB format
+            
+        Returns:
+            Dictionary with faces and num_faces
+        """
         # Run detection
         results = self.detector.detect_faces(frame)
 
-        if results is None or len(results) == 0:
+        # py-feat returns either a DataFrame (faces detected) or empty list (no faces)
+        if results is None or len(results) == 0 or isinstance(results, list):
             return {
                 "faces": [],
                 "num_faces": 0,
             }
 
-        # Parse results
+        # Parse results (DataFrame)
         faces = []
         for idx in range(len(results)):
             face_data = {

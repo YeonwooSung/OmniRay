@@ -57,16 +57,26 @@ class BaseModel(ABC):
         """Process a batch of frames using Ray.
 
         Args:
-            batch: Batch dictionary containing 'frame' key
+            batch: Batch dictionary containing 'frame' key with shape (batch_size, H, W, C)
 
         Returns:
             Batch dictionary with added 'predictions' key
         """
-        frame = batch["frame"]
-        preprocessed = self.preprocess(frame)
+        frames = batch["frame"]
+        preprocessed = self.preprocess(frames)
         predictions = self.predict(preprocessed)
 
-        return {
-            **batch,
-            "predictions": predictions,
-        }
+        # Handle batch predictions - predictions should be a list of dicts
+        # when processing a batch of frames
+        if isinstance(predictions, list):
+            # Predictions is already a list of results (one per frame)
+            return {
+                **batch,
+                "predictions": predictions,
+            }
+        else:
+            # Single prediction dict - wrap in list to match batch structure
+            return {
+                **batch,
+                "predictions": [predictions],
+            }
