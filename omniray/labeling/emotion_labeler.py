@@ -47,6 +47,7 @@ class EmotionPseudoLabeler:
         self.num_gpus = num_gpus
         self.num_cpus = num_cpus
 
+
     def generate_labels(
         self,
         video_path: str,
@@ -194,8 +195,11 @@ class EmotionPseudoLabeler:
         if not labels:
             return {
                 "total_labels": 0,
+                "unique_frames": 0,
                 "emotion_distribution": {},
                 "avg_confidence": 0.0,
+                "min_confidence": 0.0,
+                "max_confidence": 0.0,
             }
 
         # Count emotion distribution

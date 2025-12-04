@@ -103,9 +103,9 @@ training:
 # Ray Configuration
 ray:
   num_workers: 4  # More workers for larger dataset
-  num_cpus: 8
-  num_gpus: 1  # Use GPU for training
-  use_gpu: true
+  num_cpus: 4
+  num_gpus: 0  # Use GPU for training
+  use_gpu: false
 
 # Output Configuration
 output:

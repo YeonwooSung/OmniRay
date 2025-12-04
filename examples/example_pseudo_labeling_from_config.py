@@ -89,9 +89,16 @@ def run_pseudo_labeling(config: dict) -> list:
         if 'error' not in stats:
             logger.info(f"\nVideo: {Path(stats['video_path']).name}")
             logger.info(f"  Labels generated: {stats['total_labels']}")
-            logger.info(f"  Unique frames: {stats['unique_frames']}")
-            logger.info(f"  Emotion distribution: {stats['emotion_distribution']}")
-            logger.info(f"  Average confidence: {stats['avg_confidence']:.3f}")
+            logger.info(f"  Unique frames: {stats.get('unique_frames', 0)}")
+            logger.info(f"  Emotion distribution: {stats.get('emotion_distribution', {})}")
+            avg_conf = stats.get('avg_confidence', 0.0)
+            logger.info(f"  Average confidence: {avg_conf:.3f}")
+            
+            if stats['total_labels'] == 0:
+                logger.warning("  ⚠️ No faces detected in this video. Check if:")
+                logger.warning("    - Video contains visible faces")
+                logger.warning("    - Faces are large enough to detect")
+                logger.warning("    - Video format is supported")
         else:
             logger.error(f"\nFailed to process: {stats['video_path']}")
             logger.error(f"  Error: {stats['error']}")
@@ -289,7 +296,7 @@ def main():
             train_dataset, val_dataset, test_dataset = prepare_training_data(
                 config, label_stats
             )
-            
+
             training_results = run_training(
                 config, train_dataset, val_dataset, test_dataset
             )
@@ -298,7 +305,7 @@ def main():
                 logger.info("\n" + "=" * 60)
                 logger.info("Pipeline Completed Successfully!")
                 logger.info("=" * 60)
-        
+
         elif args.labeling_only:
             logger.info("\nPseudo labeling completed. Skipping training.")
 

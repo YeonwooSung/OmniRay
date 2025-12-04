@@ -2,7 +2,7 @@
 
 import logging
 from typing import Any, Dict, List, Union
-
+import torch
 import numpy as np
 
 from omniray.models.base import BaseModel
@@ -33,6 +33,7 @@ class EmotionAnalysisModel(BaseModel):
         self.au_model_name = au_model
         self.emotion_model_name = emotion_model
         self.detector = None
+
 
     def load_model(self) -> None:
         """Load py-feat detector."""
@@ -76,6 +77,7 @@ class EmotionAnalysisModel(BaseModel):
             logger.error(f"Error loading py-feat detector: {e}")
             raise
 
+
     def predict(self, frames: np.ndarray, **kwargs) -> Union[Dict[str, Any], List[Dict[str, Any]]]:
         """Run emotion analysis on frame(s).
 
@@ -98,7 +100,7 @@ class EmotionAnalysisModel(BaseModel):
 
         # Handle both single frame and batched frames
         is_batch = len(frames.shape) == 4
-        
+
         if is_batch:
             # Process batch of frames - return list of results
             batch_results = []
@@ -109,56 +111,103 @@ class EmotionAnalysisModel(BaseModel):
         else:
             # Process single frame - return single result dict
             return self._detect_single_frame(frames)
-    
+
+
+    @torch.no_grad()
     def _detect_single_frame(self, frame: np.ndarray) -> Dict[str, Any]:
         """Detect emotions in a single frame.
-        
+
         Args:
             frame: Single frame as numpy array (H, W, C) in RGB format
-            
+
         Returns:
             Dictionary with faces and num_faces
         """
-        # Run detection
-        results = self.detector.detect_faces(frame)
+        # py-feat's detect_image expects file path, but we can use detect_faces + detect_emotions
+        # For numpy arrays, we need to save temporarily or use the lower-level API
+        try:
+            # First detect faces - this returns face bounding boxes
+            # py-feat Detector.detect_faces can accept numpy arrays
+            face_results = self.detector.detect_faces(frame)
 
-        # py-feat returns either a DataFrame (faces detected) or empty list (no faces)
-        if results is None or len(results) == 0 or isinstance(results, list):
+            # If no faces detected, return empty
+            if face_results is None or len(face_results) == 0 or isinstance(face_results, list):
+                return {
+                    "faces": [],
+                    "num_faces": 0,
+                }
+
+            # For full analysis including emotions, we need to use detect() with the frame
+            # The detect() method accepts numpy arrays and runs the full pipeline
+            results = self.detector.detect(frame, data_type="frame")
+
+        except Exception as e:
+            logger.warning(f"Detection failed for frame: {e}")
             return {
                 "faces": [],
                 "num_faces": 0,
             }
 
-        # Parse results (DataFrame)
-        faces = []
-        for idx in range(len(results)):
-            face_data = {
-                "face_id": idx,
-                "bbox": results.iloc[idx][["FaceRectX", "FaceRectY", "FaceRectWidth", "FaceRectHeight"]].tolist()
-                if all(
-                    col in results.columns
-                    for col in ["FaceRectX", "FaceRectY", "FaceRectWidth", "FaceRectHeight"]
-                )
-                else None,
-                "confidence": results.iloc[idx]["FaceScore"] if "FaceScore" in results.columns else None,
+        # py-feat returns either a Fex DataFrame (faces detected) or empty/None (no faces)
+        if results is None or len(results) == 0:
+            return {
+                "faces": [],
+                "num_faces": 0,
             }
 
-            # Extract emotions if available
-            emotion_cols = [col for col in results.columns if col.startswith("emotion_")]
-            if emotion_cols:
-                emotions = {}
-                for col in emotion_cols:
-                    emotion_name = col.replace("emotion_", "")
-                    emotions[emotion_name] = float(results.iloc[idx][col])
+        # Handle case where results is a list (empty detection)
+        if isinstance(results, list):
+            return {
+                "faces": [],
+                "num_faces": 0,
+            }
+
+        # Parse results (Fex DataFrame)
+        faces = []
+        for idx in range(len(results)):
+            row = results.iloc[idx]
+
+            face_data = {
+                "face_id": idx,
+                "bbox": None,
+                "confidence": None,
+            }
+
+            # Extract bounding box if available
+            bbox_cols = ["FaceRectX", "FaceRectY", "FaceRectWidth", "FaceRectHeight"]
+            if all(col in results.columns for col in bbox_cols):
+                face_data["bbox"] = [float(row[col]) for col in bbox_cols]
+
+            # Extract face confidence/score if available
+            if "FaceScore" in results.columns:
+                face_data["confidence"] = float(row["FaceScore"])
+
+            # Extract emotions - py-feat uses lowercase emotion names like 'anger', 'disgust', etc.
+            emotion_names = ["anger", "disgust", "fear", "happiness", "sadness", "surprise", "neutral"]
+            emotions = {}
+            for emotion in emotion_names:
+                if emotion in results.columns:
+                    val = row[emotion]
+                    # Handle NaN values
+                    if val is not None and not (isinstance(val, float) and np.isnan(val)):
+                        emotions[emotion] = float(val)
+
+            if emotions:
                 face_data["emotions"] = emotions
 
-            # Extract Action Units if available
-            au_cols = [col for col in results.columns if col.startswith("AU")]
+            # Extract Action Units if available (columns like AU01, AU02, etc.)
+            au_cols = [col for col in results.columns if col.startswith("AU") and len(col) > 2]
             if au_cols:
                 action_units = {}
                 for col in au_cols:
-                    action_units[col] = float(results.iloc[idx][col])
-                face_data["action_units"] = action_units
+                    try:
+                        val = row[col]
+                        if val is not None and not (isinstance(val, float) and np.isnan(val)):
+                            action_units[col] = float(val)
+                    except (ValueError, TypeError):
+                        pass
+                if action_units:
+                    face_data["action_units"] = action_units
 
             faces.append(face_data)
 

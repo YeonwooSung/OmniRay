@@ -25,6 +25,7 @@ class VideoFrameDataset:
         self.config = config
         self.video_path = config.video_path
 
+
     def _read_frames(self) -> Iterator[dict]:
         """Read frames from video file.
 
@@ -50,10 +51,10 @@ class VideoFrameDataset:
         try:
             while True:
                 ret, frame = cap.read()
-
                 if not ret:
                     break
 
+                print(f"Reading frame {frame_idx} from {self.video_path}")
                 # Skip frames if configured
                 if frame_idx % self.config.frame_skip != 0:
                     frame_idx += 1
@@ -87,6 +88,7 @@ class VideoFrameDataset:
             cap.release()
 
         logger.info(f"Processed {frames_processed} frames from video")
+
 
     def create_dataset(self) -> Dataset:
         """Create Ray Dataset from video frames.

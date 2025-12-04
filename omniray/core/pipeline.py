@@ -10,12 +10,70 @@ from ray.data import Dataset
 
 from omniray.config.schemas import InferenceConfig, ModelType
 from omniray.data.video_loader import load_video_frames
-from omniray.models.custom import CustomModel
-from omniray.models.detection import ObjectDetectionModel
-from omniray.models.emotion import EmotionAnalysisModel
 
 
 logger = logging.getLogger(__name__)
+
+
+class EmotionModelActor:
+    """Actor class for emotion model inference - loads model once per worker."""
+
+    def __init__(self, detector: str = "retinaface", au_model: str = "xgb", emotion_model: str = "resmasknet"):
+        self.detector = detector
+        self.au_model = au_model
+        self.emotion_model = emotion_model
+        self.model = None
+
+    def _load_model(self):
+        """Load model on first call."""
+        if self.model is None:
+            from omniray.models.emotion import EmotionAnalysisModel
+            self.model = EmotionAnalysisModel(
+                detector=self.detector,
+                au_model=self.au_model,
+                emotion_model=self.emotion_model,
+            )
+            self.model.load_model()
+
+    def __call__(self, batch: Dict[str, Any]) -> Dict[str, Any]:
+        """Process a batch of frames."""
+        self._load_model()
+        return self.model(batch)
+
+
+class ObjectDetectionModelActor:
+    """Actor class for object detection model inference."""
+    
+    def __init__(self):
+        self.model = None
+    
+    def _load_model(self):
+        if self.model is None:
+            from omniray.models.detection import ObjectDetectionModel
+            self.model = ObjectDetectionModel()
+            self.model.load_model()
+    
+    def __call__(self, batch: Dict[str, Any]) -> Dict[str, Any]:
+        self._load_model()
+        return self.model(batch)
+
+
+class CustomModelActor:
+    """Actor class for custom model inference."""
+    
+    def __init__(self, custom_model_config: dict):
+        self.custom_model_config = custom_model_config
+        self.model = None
+    
+    def _load_model(self):
+        if self.model is None:
+            from omniray.models.custom import CustomModel
+            self.model = CustomModel(self.custom_model_config)
+            self.model.load_model()
+    
+    def __call__(self, batch: Dict[str, Any]) -> Dict[str, Any]:
+        self._load_model()
+        return self.model(batch)
 
 
 class VideoInferencePipeline:
@@ -31,46 +89,31 @@ class VideoInferencePipeline:
         self.model = None
         self.results = None
 
-    def _create_model(self):
-        """Create model instance based on configuration."""
+
+    def _get_model_actor_class(self):
+        """Get the appropriate model actor class based on configuration.
+        
+        Returns:
+            Tuple of (ActorClass, kwargs) for the model
+        """
         model_type = self.config.model_type
 
         if model_type == ModelType.OBJECT_DETECTION:
             logger.info("Creating object detection model")
-            self.model = ObjectDetectionModel()
+            return ObjectDetectionModelActor, {}
 
         elif model_type == ModelType.EMOTION_ANALYSIS:
             logger.info("Creating emotion analysis model")
-            self.model = EmotionAnalysisModel()
+            return EmotionModelActor, {}
 
         elif model_type == ModelType.CUSTOM:
             logger.info("Creating custom model")
             if self.config.custom_model_config is None:
                 raise ValueError("custom_model_config is required for CUSTOM model type")
-            self.model = CustomModel(self.config.custom_model_config)
+            return CustomModelActor, {"custom_model_config": self.config.custom_model_config}
 
         else:
             raise ValueError(f"Unsupported model type: {model_type}")
-
-        # Load the model
-        self.model.load_model()
-
-    def _inference_fn(self, batch: Dict[str, Any]) -> Dict[str, Any]:
-        """Ray map function for batch inference.
-
-        Args:
-            batch: Batch dictionary containing frame data
-
-        Returns:
-            Batch with predictions added
-        """
-        # This will be called within Ray workers
-        # The model needs to be loaded within each worker
-        if not hasattr(self, "_worker_model"):
-            self._create_model()
-            self._worker_model = self.model
-
-        return self._worker_model(batch)
 
     def run(self) -> Dataset:
         """Run the inference pipeline.
@@ -99,18 +142,20 @@ class VideoInferencePipeline:
         logger.info(f"Loading video: {self.config.video_config.video_path}")
         dataset = load_video_frames(self.config.video_config)
 
-        # Create model (this will be serialized to Ray workers)
-        self._create_model()
+        # Get the model actor class (lightweight - doesn't load actual model yet)
+        actor_class, actor_kwargs = self._get_model_actor_class()
 
-        # Run inference using Ray Data
+        # Run inference using Ray Data with class-based actor
+        # The model will be loaded once per worker, not serialized from driver
         logger.info("Running inference on video frames")
 
-        # Use map_batches for efficient batch processing
-        # (ray data distributed inference)
+        # ray data를 통해서 batch 단위로 actor를 호출하여 inference 수행
         results_dataset = dataset.map_batches(
-            lambda batch: self._inference_fn(batch),
+            actor_class,
             batch_size=self.config.video_config.batch_size,
             num_gpus=self.config.ray_options.get("num_gpus", 0),
+            concurrency=self.config.ray_options.get("num_cpus", 4),
+            fn_constructor_kwargs=actor_kwargs if actor_kwargs else None,
         )
 
         self.results = results_dataset
