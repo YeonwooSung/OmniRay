@@ -102,9 +102,14 @@ class VideoFrameDataset:
         # Flat map to expand each video into frames
         ds = ds.flat_map(lambda _: self._read_frames())
 
-        # Repartition for better parallelism if needed
-        if self.config.batch_size:
-            num_blocks = max(1, ds.count() // self.config.batch_size)
+        # Note: Avoid calling ds.count() here as it triggers full execution
+        # of the pipeline and can cause deadlock when downstream actors
+        # are holding all CPU resources. Use a fixed number of partitions
+        # or estimate based on video metadata instead.
+        if self.config.batch_size and self.config.max_frames:
+            # Estimate number of blocks based on max_frames config
+            estimated_frames = self.config.max_frames // self.config.frame_skip
+            num_blocks = max(1, estimated_frames // self.config.batch_size)
             ds = ds.repartition(num_blocks)
 
         return ds
