@@ -149,39 +149,69 @@ class EmotionPseudoLabeler:
         results_list = results_dataset.take_all()
 
         for result in results_list:
-            frame_idx = result["frame_idx"]
+            frame_indices = result["frame_idx"]
             predictions = result["predictions"]
 
-            # Process each detected face
-            for face in predictions.get("faces", []):
-                # Filter by confidence if available
-                if "confidence" in face and face["confidence"] is not None:
-                    if face["confidence"] < self.confidence_threshold:
-                        continue
-
-                # Extract dominant emotion
-                if "emotions" in face:
-                    emotions = face["emotions"]
-                    dominant_emotion = max(emotions.items(), key=lambda x: x[1])
+            # Handle both batch and single-frame results
+            # In batch mode: frame_idx is an array, predictions is a list
+            # In single mode: frame_idx is a scalar, predictions is a dict
+            if isinstance(predictions, list):
+                # Batch mode: iterate over each frame's predictions
+                for i, pred in enumerate(predictions):
+                    # Get the corresponding frame index
+                    if hasattr(frame_indices, '__iter__') and not isinstance(frame_indices, str):
+                        frame_idx = frame_indices[i] if i < len(frame_indices) else frame_indices
+                    else:
+                        frame_idx = frame_indices
                     
-                    label_entry = {
-                        "frame_idx": frame_idx,
-                        "face_id": face["face_id"],
-                        "dominant_emotion": dominant_emotion[0],
-                        "emotion_confidence": dominant_emotion[1],
-                        "all_emotions": emotions,
-                        "bbox": face.get("bbox"),
-                        "face_confidence": face.get("confidence"),
-                    }
-
-                    # Add action units if available
-                    if "action_units" in face:
-                        label_entry["action_units"] = face["action_units"]
-
-                    labels.append(label_entry)
+                    self._process_single_prediction(frame_idx, pred, labels)
+            else:
+                # Single frame mode: predictions is a dict
+                self._process_single_prediction(frame_indices, predictions, labels)
 
         logger.info(f"Processed {len(labels)} pseudo labels from results")
         return labels
+
+    def _process_single_prediction(
+        self,
+        frame_idx: int,
+        predictions: Dict[str, Any],
+        labels: List[Dict[str, Any]],
+    ) -> None:
+        """Process predictions for a single frame.
+
+        Args:
+            frame_idx: Frame index
+            predictions: Prediction dictionary with 'faces' key
+            labels: List to append label entries to
+        """
+        # Process each detected face
+        for face in predictions.get("faces", []):
+            # Filter by confidence if available
+            if "confidence" in face and face["confidence"] is not None:
+                if face["confidence"] < self.confidence_threshold:
+                    continue
+
+            # Extract dominant emotion
+            if "emotions" in face:
+                emotions = face["emotions"]
+                dominant_emotion = max(emotions.items(), key=lambda x: x[1])
+                
+                label_entry = {
+                    "frame_idx": int(frame_idx) if hasattr(frame_idx, 'item') else frame_idx,
+                    "face_id": face["face_id"],
+                    "dominant_emotion": dominant_emotion[0],
+                    "emotion_confidence": dominant_emotion[1],
+                    "all_emotions": emotions,
+                    "bbox": face.get("bbox"),
+                    "face_confidence": face.get("confidence"),
+                }
+
+                # Add action units if available
+                if "action_units" in face:
+                    label_entry["action_units"] = face["action_units"]
+
+                labels.append(label_entry)
 
     def _generate_statistics(self, labels: List[Dict[str, Any]]) -> Dict[str, Any]:
         """Generate statistics about the generated labels.

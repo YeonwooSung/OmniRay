@@ -102,7 +102,7 @@ training:
 
 # Ray Configuration
 ray:
-  num_workers: 4  # More workers for larger dataset
+  num_workers: 2  # Reduced to fit 4 CPU cluster (2 workers + driver overhead)
   num_cpus: 4
   num_gpus: 0  # Use GPU for training
   use_gpu: false

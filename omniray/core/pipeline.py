@@ -150,9 +150,11 @@ class VideoInferencePipeline:
         logger.info("Running inference on video frames")
 
         # ray data를 통해서 batch 단위로 actor를 호출하여 inference 수행
+        # Use batch_format="numpy" to ensure frames are passed as numpy arrays
         results_dataset = dataset.map_batches(
             actor_class,
             batch_size=self.config.video_config.batch_size,
+            batch_format="numpy",  # Ensure numpy format for frame data
             num_gpus=self.config.ray_options.get("num_gpus", 0),
             concurrency=self.config.ray_options.get("num_cpus", 4),
             fn_constructor_kwargs=actor_kwargs if actor_kwargs else None,

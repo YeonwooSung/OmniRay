@@ -41,7 +41,8 @@ class EmotionTrainingPipeline:
         self.model = model
         self.num_workers = num_workers
         self.use_gpu = use_gpu
-        self.results_dir = Path(results_dir)
+        # Convert to absolute path - Ray Train requires absolute paths for storage
+        self.results_dir = Path(results_dir).resolve()
         self.results_dir.mkdir(parents=True, exist_ok=True)
 
     def train(
@@ -191,11 +192,13 @@ class EmotionTrainingPipeline:
                     f"val_acc={val_acc:.2f}%"
                 )
 
-        # Configure scaling
+        # Configure scaling - adjust resources based on available resources
+        # Each worker needs CPU, and there's overhead for the driver
+        cpus_per_worker = 1  # Reduced from 2 to fit more workers
         scaling_config = ScalingConfig(
             num_workers=self.num_workers,
             use_gpu=self.use_gpu,
-            resources_per_worker={"CPU": 2, "GPU": 1 if self.use_gpu else 0},
+            resources_per_worker={"CPU": cpus_per_worker, "GPU": 1 if self.use_gpu else 0},
         )
 
         # Configure checkpointing
