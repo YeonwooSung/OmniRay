@@ -58,14 +58,29 @@ class EmotionDataset(TorchDataset):
 
         self.idx_to_emotion = {idx: emotion for emotion, idx in self.emotion_to_idx.items()}
 
-        # Cache video capture
-        self.video_capture = None
+        # NOTE: Do NOT create VideoCapture here - it cannot be pickled
+        # VideoCapture will be created lazily in _load_frame
+        self._video_capture = None
         self._frame_cache = {}
 
         logger.info(
             f"Initialized EmotionDataset with {len(labels)} samples, "
             f"{len(self.emotion_to_idx)} emotion classes"
         )
+
+    def __getstate__(self):
+        """Get state for pickling - exclude VideoCapture."""
+        state = self.__dict__.copy()
+        # Remove unpicklable VideoCapture
+        state['_video_capture'] = None
+        state['_frame_cache'] = {}
+        return state
+
+    def __setstate__(self, state):
+        """Set state after unpickling."""
+        self.__dict__.update(state)
+        self._video_capture = None
+        self._frame_cache = {}
 
     def __len__(self) -> int:
         """Get dataset length."""
@@ -129,15 +144,15 @@ class EmotionDataset(TorchDataset):
         if frame_idx in self._frame_cache:
             return self._frame_cache[frame_idx].copy()
         
-        # Open video if not already open
-        if self.video_capture is None:
-            self.video_capture = cv2.VideoCapture(self.video_path)
+        # Open video lazily (not in __init__ to allow pickling)
+        if self._video_capture is None:
+            self._video_capture = cv2.VideoCapture(self.video_path)
         
         # Set frame position
-        self.video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
+        self._video_capture.set(cv2.CAP_PROP_POS_FRAMES, frame_idx)
         
         # Read frame
-        ret, frame = self.video_capture.read()
+        ret, frame = self._video_capture.read()
         
         if not ret:
             raise ValueError(f"Failed to read frame {frame_idx} from {self.video_path}")
