@@ -172,3 +172,7 @@ Thumbs.db
 
 # Claude
 .claude/
+
+# datasets & training results
+full_dataset/
+training_results/
