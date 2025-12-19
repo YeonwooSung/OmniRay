@@ -169,7 +169,6 @@ def run_training(config: dict, train_dataset, val_dataset, test_dataset):
 
     # Import here to avoid errors if torch is not installed
     try:
-        import torch
         import torch.nn as nn
         from omniray.training.trainer import EmotionTrainingPipeline
     except ImportError as e:
